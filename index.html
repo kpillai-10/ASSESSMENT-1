@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A simple task tracker to organize and manage daily tasks." />
+  <title>Task Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <div class="brand-mark" aria-hidden="true">✓</div>
+      <div class="brand-text">
+        <p class="eyebrow">YOUR PERSONAL WORKSPACE</p>
+        <h1>Task Tracker</h1>
+        <p class="subtitle">Make a plan. Take it one task at a time.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="load-sample-btn" class="button button-sm button-sample" title="Populate demo tasks to test charts and filters">✨ Load Sample Tasks</button>
+      </div>
+    </header>
+
+    <!-- Innovative Analytics Dashboard -->
+    <section class="analytics-card" aria-label="Task Analytics & Progress">
+      <div class="analytics-header">
+        <div>
+          <span class="eyebrow">PRODUCTIVITY INSIGHTS</span>
+          <h2 class="analytics-title">Task Analytics & Distribution</h2>
+        </div>
+        <div id="urgent-badge-container" class="urgent-badge-container"></div>
+      </div>
+
+      <div class="analytics-body">
+        <!-- SVG Donut Progress Chart -->
+        <div class="chart-wrapper">
+          <div class="donut-chart-box">
+            <svg class="donut-svg" viewBox="0 0 100 100" width="105" height="105" aria-hidden="true">
+              <circle class="donut-bg" cx="50" cy="50" r="40" />
+              <circle id="donut-stroke" class="donut-bar" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+            </svg>
+            <div class="donut-text">
+              <strong id="donut-percent" class="donut-number">0%</strong>
+              <span class="donut-caption">DONE</span>
+            </div>
+          </div>
+          <span class="chart-caption" id="progress-text">0 of 0 completed</span>
+        </div>
+
+        <!-- Metrics & Priority Breakdown -->
+        <div class="analytics-details">
+          <div class="mini-metrics">
+            <div class="metric-pill">
+              <span class="metric-label">Total</span>
+              <strong id="total-count">0</strong>
+            </div>
+            <div class="metric-pill metric-completed">
+              <span class="metric-label">Completed</span>
+              <strong id="completed-count">0</strong>
+            </div>
+            <div class="metric-pill metric-pending">
+              <span class="metric-label">Pending</span>
+              <strong id="pending-count">0</strong>
+            </div>
+          </div>
+
+          <!-- Priority Distribution Stacked Bar -->
+          <div class="priority-dist-card">
+            <div class="dist-header">
+              <span class="dist-title">Priority Breakdown</span>
+              <span id="priority-breakdown-text" class="dist-legend">0 High • 0 Med • 0 Low</span>
+            </div>
+            <div class="stacked-bar-track" role="progressbar" aria-label="Priority distribution">
+              <div id="dist-high" class="dist-segment dist-high" style="width: 0%" title="High Priority"></div>
+              <div id="dist-med" class="dist-segment dist-med" style="width: 0%" title="Medium Priority"></div>
+              <div id="dist-low" class="dist-segment dist-low" style="width: 0%" title="Low Priority"></div>
+            </div>
+            <div class="priority-legend-chips">
+              <span class="legend-chip chip-high"><span class="chip-dot"></span> High: <b id="count-high">0</b></span>
+              <span class="legend-chip chip-med"><span class="chip-dot"></span> Med: <b id="count-med">0</b></span>
+              <span class="legend-chip chip-low"><span class="chip-dot"></span> Low: <b id="count-low">0</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="add-heading">
+      <h2 id="add-heading">Add a task</h2>
+      <form id="task-form" class="add-form">
+        <div class="form-row-main">
+          <label class="sr-only" for="task-input">Task description</label>
+          <input
+            id="task-input"
+            name="task"
+            type="text"
+            maxlength="200"
+            placeholder="What do you need to get done?"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <div class="form-row-meta">
+          <div class="form-control-group">
+            <label class="control-label" for="task-priority">Priority</label>
+            <select id="task-priority" name="priority">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+          <div class="form-control-group">
+            <label class="control-label" for="task-due-date">Due Date</label>
+            <input id="task-due-date" name="dueDate" type="date" />
+          </div>
+          <button class="button button-primary" type="submit">＋ Add task</button>
+        </div>
+      </form>
+      <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel task-panel" aria-labelledby="tasks-heading">
+      <div class="task-panel-heading">
+        <div>
+          <h2 id="tasks-heading">Your tasks</h2>
+          <p class="section-hint">Select a status, priority, or search to organize your list.</p>
+        </div>
+      </div>
+
+      <div class="controls-toolbar">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="text"
+            id="task-search"
+            placeholder="Search tasks by title..."
+            aria-label="Search tasks"
+            autocomplete="off"
+          />
+          <button type="button" id="clear-search" class="clear-search-btn" aria-label="Clear search" title="Clear search" hidden>✕</button>
+        </div>
+
+        <div class="filter-controls">
+          <label class="filter-label" for="task-filter">Status
+            <select id="task-filter">
+              <option value="all">All tasks</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+          </label>
+
+          <label class="filter-label" for="priority-filter">Priority
+            <select id="priority-filter">
+              <option value="all">All</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+
+          <label class="filter-label" for="sort-select">Sort
+            <select id="sort-select">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="priority">Priority (High-Low)</option>
+              <option value="due-date">Due date</option>
+              <option value="alphabetical">Title (A-Z)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <ul id="task-list" class="task-list" aria-live="polite"></ul>
+      <div id="empty-state" class="empty-state">
+        <div class="empty-icon" aria-hidden="true">☷</div>
+        <h3 id="empty-title">Nothing on your list yet</h3>
+        <p id="empty-description">Add your first task above to get started.</p>
+        <div class="empty-actions">
+          <button id="empty-sample-btn" class="button button-primary button-sm" type="button">✨ Load Sample Tasks</button>
+          <button id="reset-filters-btn" class="button button-outline button-sm" type="button" hidden>Clear filters & search</button>
+        </div>
+      </div>
+      <footer class="list-footer">
+        <span id="list-summary">0 tasks</span>
+        <div class="footer-actions">
+          <button id="export-btn" class="text-button" type="button" title="Export tasks to JSON file">Export JSON</button>
+          <label class="text-button import-label" title="Import tasks from JSON file">Import JSON
+            <input type="file" id="import-input" accept=".json" hidden />
+          </label>
+          <button id="clear-completed" class="text-button" type="button" disabled>Clear completed</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Undo Toast Notification -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+      <span id="toast-message" class="toast-message">Task deleted</span>
+      <button type="button" id="toast-undo" class="toast-undo-btn">Undo</button>
+    </div>
+
+    <footer class="app-footer">
+      <span>Simple tasks. Steady progress.</span>
+      <span>Tasks are saved in this browser.</span>
+    </footer>
+  </main>
+</body>
+</html>
